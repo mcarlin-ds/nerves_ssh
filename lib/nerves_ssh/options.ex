@@ -167,11 +167,12 @@ defmodule NervesSSH.Options do
   defp shell_opts(%{shell: :elixir, iex_opts: iex_opts}),
     do: [{:shell, {Elixir.IEx, :start, [iex_opts]}}]
 
-  defp shell_opts(%{shell: :erlang}), do: []
+  defp shell_opts(%{shell: :erlang}), do: [{:shell, {:shell, :start, []}}]
   defp shell_opts(%{shell: :disabled}), do: [shell: :disabled]
 
   if @otp >= 23 do
     defp exec_opts(%{exec: :elixir}), do: [exec: {:direct, &NervesSSH.Exec.run_elixir/1}]
+    defp exec_opts(%{exec: :erlang}), do: [exec: {:direct, &NervesSSH.Exec.run_erlang/1}]
     defp exec_opts(%{exec: :disabled}), do: [exec: :disabled]
   else
     # Old way of passing exec options
