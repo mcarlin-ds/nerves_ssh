@@ -11,8 +11,8 @@ defmodule NervesSSH.SCP do
   Run the SCP command.
   """
   def run("scp " <> options) do
+    :io.setopts(encoding: :latin1)
     Logger.info("getopts: #{inspect :io.getopts()}")
-    #:io.setopts( binary: true)
     {path, args} = parse_args(options)
 
     Logger.info("scp: #{inspect(args)}")

@@ -187,6 +187,7 @@ defmodule NervesSSH.Options do
 
         {:error, output} ->
           IO.binwrite(output)
+          exit({:exit_status, 1})
       end
     end
   end
