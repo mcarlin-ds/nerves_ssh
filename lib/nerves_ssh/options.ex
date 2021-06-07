@@ -193,7 +193,8 @@ defmodule NervesSSH.Options do
   end
 
   defp key_cb_opts(opts) do
-    keys = Enum.flat_map(opts.authorized_keys, &:public_key.ssh_decode(&1, :auth_keys))
+    otp_version = System.otp_release() |> String.to_integer()
+    keys = Enum.flat_map(opts.authorized_keys, &decode_key(otp_version, &1))
 
     [key_cb: {NervesSSH.Keys, [authorized_keys: keys]}]
   end
@@ -276,4 +277,9 @@ defmodule NervesSSH.Options do
       _ -> false
     end
   end
+
+  # :public_key.ssh_decode/2 will be deprecated in OTP 26.
+  # Deprecation warning introduced with OTP 24
+  defp decode_key(otp_ver, key) when otp_ver >= 24, do: :ssh_file.decode(key, :auth_keys)
+  defp decode_key(_otp_ver, key), do: :public_key.ssh_decode(key, :auth_keys)
 end
