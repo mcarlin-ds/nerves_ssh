@@ -18,7 +18,7 @@ defmodule NervesSSH.Exec do
   @doc """
   Run one Erlang command coming over ssh
   """
-  @spec run_erlang(charlist()) :: {:ok, binary()} | {:error, binary()}
+  @spec run_erlang(charlist()) :: {:ok, binary()} | {:error, binary() | charlist()}
   def run_erlang(cmd) do
     with {:ok, tokens} <- erl_scan(cmd),
          {:ok, expr_list} <- erl_parse(tokens) do
@@ -29,8 +29,11 @@ defmodule NervesSSH.Exec do
 
   defp erl_scan(cmd) do
     case :erl_scan.string(cmd) do
-      {:ok, tokens, _} -> {:ok, tokens}
-      {:error, {_, :erl_scan, cause}} -> {:error, :erl_scan.format_error(cause)}
+      {:ok, tokens, _} ->
+        {:ok, tokens}
+
+      {:error, {_anno_location, :erl_scan, cause}, _location} ->
+        {:error, :erl_scan.format_error(cause)}
     end
   end
 
@@ -38,7 +41,6 @@ defmodule NervesSSH.Exec do
     case :erl_parse.parse_exprs(tokens) do
       {:ok, expr_list} -> {:ok, expr_list}
       {:error, {_, :erl_parse, cause}} -> {:error, :erl_parse.format_error(cause)}
-      {:error, other} -> {:error, other}
     end
   end
 end
